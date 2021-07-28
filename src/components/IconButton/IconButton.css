@@ -1,0 +1,21 @@
+.IconButton {
+  margin: 0;
+  padding: 10px;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font: inherit;
+  background-color: #f44336;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &__close {
+    background-color: #f44336;
+  }
+  &:focus {
+    outline-style: ridge;
+  }
+}

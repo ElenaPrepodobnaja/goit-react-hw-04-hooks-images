@@ -1,0 +1,6 @@
+@import '../../../node_modules/react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+
+.Loader {
+  margin-top: 100px;
+  margin-bottom: 50px;
+}
