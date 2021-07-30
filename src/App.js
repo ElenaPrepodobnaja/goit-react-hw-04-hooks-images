@@ -21,18 +21,6 @@ export default class App extends Component {
     selectedImgURL: '',
     selectedLowQImgUrl: '',
     isModalOpen: false,
-    hadleImageClick: e => {
-      if (e.target.nodeName !== 'IMG') {
-        return;
-      }
-
-      e.preventDefault();
-      const fullImgLink = e.target.getAttribute('data-large');
-      this.setState({
-        selectedImgURL: fullImgLink,
-        isModalOpen: true,
-      });
-    },
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -135,7 +123,6 @@ export default class App extends Component {
       isLoading,
       selectedImgURL,
       isModalOpen,
-      hadleImageClick,
       selectedLowQImgUrl,
     } = this.state;
 
@@ -165,7 +152,7 @@ export default class App extends Component {
           </Section>
         )}
 
-        <authContext.Provider value={hadleImageClick}>
+        <authContext.Provider value={this.hadleImageClick}>
           {search && <ImageGallery gallery={gallery} />}
         </authContext.Provider>
 
