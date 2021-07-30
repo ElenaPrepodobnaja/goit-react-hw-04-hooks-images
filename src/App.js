@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import 'lazysizes';
 import { ToastContainer, toast } from 'react-toastify';
 import LoaderSpinner from './components/Loader';
@@ -11,51 +11,41 @@ import Modal from './components/Modal';
 import DefaultEmptyField from './components/DefaultEmpyField';
 import authContext from './components/Context';
 
-export default class App extends Component {
-  state = {
-    gallery: [],
-    currentPage: 1,
-    isLoading: false,
-    search: '',
-    error: null,
-    selectedImgURL: '',
-    selectedLowQImgUrl: '',
-    isModalOpen: false,
-  };
+export default function App() {
+  const [gallery, setGallery] = useState([]);
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedImgURL, setSelectedImgURL] = useState('');
+  const [selectedLowQImgUrl, setSelectedLowQImgUrl] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.search !== this.state.search) {
-      this.fetchPictures();
-    }
-  }
+  useEffect(() => {
+    fetchPictures();
+  }, [search]);
 
-  fetchPictures = () => {
-    const { search, currentPage } = this.state;
-
-    this.setState({ isLoading: true });
+  const fetchPictures = () => {
+    setIsLoading(true);
 
     fetchGallery(search, currentPage)
       .then(images => {
-        this.setState(prevState => ({
-          gallery: [...prevState.gallery, ...images],
-          currentPage: prevState.currentPage + 1,
-        }));
+        setGallery(gallery => [...gallery, ...images]);
+        setCurrentPage(currentPage => currentPage + 1);
       })
-      .catch(error => this.setState({ error }))
+      .catch(error => setError(error))
       .finally(() => {
-        this.onLoadMoreBtnClick();
-        this.setState({ isLoading: false });
+        onLoadMoreBtnClick();
+        setIsLoading(false);
       });
   };
 
-  handleSubmit = query => {
-    if (query !== this.state.search) {
-      this.setState({
-        gallery: [],
-        search: query,
-        currentPage: 1,
-        error: null,
-      });
+  const handleSubmit = query => {
+    if (query !== search) {
+      setGallery([]);
+      setSearch(query);
+      setCurrentPage(1);
+      setError(null);
     }
 
     if (!query) {
@@ -75,8 +65,8 @@ export default class App extends Component {
     }
   };
 
-  onLoadMoreBtnClick = () => {
-    if (this.state.currentPage > 2) {
+  const onLoadMoreBtnClick = () => {
+    if (setCurrentPage > 2) {
       const options = {
         top: null,
         behavior: 'smooth',
@@ -89,7 +79,7 @@ export default class App extends Component {
     }
   };
 
-  hadleImageClick = e => {
+  const hadleImageClick = e => {
     if (e.target.nodeName !== 'IMG') {
       return;
     }
@@ -99,80 +89,61 @@ export default class App extends Component {
     const fullImgLink = e.target.getAttribute('data-large');
     const lowSrc = e.target.getAttribute('src');
 
-    this.setState({
-      selectedImgURL: fullImgLink,
-      selectedLowQImgUrl: lowSrc,
-      isModalOpen: true,
-    });
+    setSelectedImgURL(fullImgLink);
+    setSelectedLowQImgUrl(lowSrc);
+    setIsModalOpen(true);
   };
 
-  toggleModal = () => {
-    this.setState({
-      isModalOpen: !this.state.isModalOpen,
-    });
+  const toggleModal = () => {
+    setIsModalOpen(isModalOpen => !isModalOpen);
 
-    if (this.state.isModalOpen) {
+    if (setIsModalOpen) {
       document.body.style.overflowY = 'hidden';
     }
   };
 
-  render() {
-    const {
-      search,
-      gallery,
-      isLoading,
-      selectedImgURL,
-      isModalOpen,
-      selectedLowQImgUrl,
-    } = this.state;
+  return (
+    <>
+      <Seachbar onSubmit={handleSubmit} />
 
-    // console.log(gallery);
+      {gallery.length === 0 && <DefaultEmptyField />}
 
-    return (
-      <>
-        <Seachbar onSubmit={this.handleSubmit} />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        draggablePercent={60}
+      />
 
-        {gallery.length === 0 && <DefaultEmptyField />}
-
-        <ToastContainer
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          draggablePercent={60}
-        />
-
-        {isLoading && (
-          <Section>
-            <LoaderSpinner />
-          </Section>
-        )}
-
-        <authContext.Provider value={this.hadleImageClick}>
-          {search && <ImageGallery gallery={gallery} />}
-        </authContext.Provider>
-
-        {isModalOpen && (
-          <Modal onClose={this.toggleModal}>
-            <img
-              src={selectedLowQImgUrl}
-              data-src={selectedImgURL}
-              alt="fullsizeImage"
-              className="lazyload blur-up"
-            ></img>
-          </Modal>
-        )}
-
+      {isLoading && (
         <Section>
-          {search && gallery.length > 11 && (
-            <Button onClick={this.fetchPictures} />
-          )}
+          <LoaderSpinner />
         </Section>
-      </>
-    );
-  }
+      )}
+
+      <authContext.Provider value={hadleImageClick}>
+        {search && <ImageGallery gallery={gallery} />}
+      </authContext.Provider>
+
+      {isModalOpen && (
+        <Modal onClose={toggleModal}>
+          <img
+            src={selectedLowQImgUrl}
+            data-src={selectedImgURL}
+            alt="fullsizeImage"
+            className="lazyload blur-up"
+          ></img>
+        </Modal>
+      )}
+
+      <Section>
+        {search && gallery.length > 11 && <Button onClick={fetchPictures} />}
+      </Section>
+    </>
+  );
 }
