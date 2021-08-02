@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import { useState, useEffect } from 'react';
 import 'lazysizes';
 import { ToastContainer, toast } from 'react-toastify';
@@ -60,8 +61,6 @@ export default function App() {
           progress: undefined,
         });
       notify();
-
-      return;
     }
   };
 
@@ -137,7 +136,7 @@ export default function App() {
             data-src={selectedImgURL}
             alt="fullsizeImage"
             className="lazyload blur-up"
-          ></img>
+          />
         </Modal>
       )}
 
