@@ -24,7 +24,7 @@ export default function App() {
 
   useEffect(() => {
     fetchPictures();
-  }, [search]);
+  }, []);
 
   const fetchPictures = () => {
     setIsLoading(true);
